@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %} Predicted {%endblock%}
+
+{% block content %}
+
+{% if data[3] != [] %}
+<div align='center'>The stock ticker {{data[3] | trim("['']") }} doesn't exist in yahoo finance.</div>
+{% endif %} 
+
+<div class='row'> 
+    <div class='column' align='center'> max sharpe ratio{{data[0] | safe  }}</div>
+    <div class='column' align='center'>  min volatility{{data[1] | safe | center }} </div>
+</div>
+
+    
+<div id='chart' class='chart'” align='center'></div>
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script type='text/javascript'>
+    var graphs = {{data[2] | safe}};
+    Plotly.plot('chart',graphs,{});
+</script>
+
+{% endblock %}

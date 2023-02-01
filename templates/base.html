@@ -1,0 +1,23 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %} {% endblock %} - by R.Lopes </title>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/mainpage.css') }}">
+</head>
+
+<body>
+    <nav>
+        <div class='column' ><a href="{{url_for('index')}}">Markowitz App</a></div>
+        <div class='column' align='right'><a href="{{url_for('about')}}" >About</a></div>
+    </nav>
+    <hr>
+    <div class="content">
+        {% block content %} {% endblock %}
+    </div>
+</body>
+<footer>
+    <p align='right'>Author: Rafael Lopes</p>
+</footer>
+</html>

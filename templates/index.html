@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %} Markowitz App {% endblock %}
+
+{% block content%}
+<form action="/predict" method="post">
+    <br>
+    <label for="stock_1">Stock 1:</label>
+    <input type="text" name="stock_1" id="stock_1" style="text-transform:uppercase">
+    
+    <br>    
+    <label for="stock_2">Stock 2:</label>
+    <input type="text" name="stock_2" id="stock_2" style="text-transform:uppercase">
+    
+    <br>
+    <label for="stock_3">Stock 3:</label>
+    <input type="text" name="stock_3" id="stock_3" style="text-transform:uppercase">
+    
+    <br>
+    <label for="stock_4">Stock 4:</label>
+    <input type="text" name="stock_4" id="stock_4" style="text-transform:uppercase">
+    
+ 
+    <p>
+        <div style="width: 240px" align='right'>
+            <input type="submit" value="Calculate">
+        </div>
+    </p>
+    </form>
+
+    <div class='index-text'>
+        <h3 style='margin-bottom: 12px'>How to use:</h3>
+            <p>Put the stock tickers you want to calculate the efficient frontier on the cells above.</p>
+            <p>The tickers need to be the same as in Yahoo Finance website.</p>
+    </div>
+    
+    <div class='index-text'>
+        ADD DISCLAIMER HERE.
+    </div>
+    
+    <!-- MAYBE PUT THIS AS BUTTON TO ADD N NUMBER OF LINES TO SEND STOCKS. --> 
+    The correlation of risk between the stocks in portfolio go to zero if well done, but could go to median variance on the other way, be aware.
+    You can use variety of different assets class to have better diversified your risk.
+{% endblock %}
