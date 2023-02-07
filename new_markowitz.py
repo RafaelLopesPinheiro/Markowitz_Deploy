@@ -36,16 +36,16 @@ def calc_port_perf(weights, mean_returns, cov_matrix):
     return portfolio_return, portfolio_std
 
 
-def negative_sharp(weights, mean_returns, cov_matrix, risk_free_rate=0.05):
+def negative_sharp(weights, mean_returns, cov_matrix, risk_free_rate=0.0):
     port_ret, port_var = calc_port_perf(mean_returns, weights, cov_matrix)
     return -(port_ret - risk_free_rate) / port_var
 
 
-def max_sharp_ratio_port(mean_returns, cov_matrix, risk_free_rate=0.05):
+def max_sharp_ratio_port(mean_returns, cov_matrix, risk_free_rate=0.0):
     n_assets = len(mean_returns)
     args = (mean_returns, cov_matrix, risk_free_rate)
     constraints = ({'type':'eq', 'fun': lambda x: np.sum(x) - 1})
-    bounds = tuple( (0.0, 1.0) for asset in range(n_assets))
+    bounds = tuple( (0, 1) for asset in range(n_assets) )
     
     optimizer = sco.minimize(negative_sharp, n_assets*[1./n_assets], args=args, method='SLSQP', bounds=bounds, constraints=constraints)
     return optimizer
@@ -67,7 +67,7 @@ def min_variance_port(mean_returns, cov_matrix):
 
 
 
-def efficient_frontier(df, num_portfolios, risk_free_rate=0.05):
+def efficient_frontier(df, num_portfolios, risk_free_rate=0.0):
     '''
     Returns the portfolios stdev, returns, sharpe ratio and weights of each stock.
     '''
@@ -87,6 +87,9 @@ def efficient_frontier(df, num_portfolios, risk_free_rate=0.05):
         weights_record.append(weights)  #TESTING FUNCTION
         
         portfolio_return, portfolio_std_dev = calc_port_perf(weights, mean_daily_returns, cov_matrix)
+        std_neg = np.where(portfolio_return<0)
+        print(std_neg)
+        
         
         results[0, i] = portfolio_return
         results[1, i] = portfolio_std_dev
@@ -118,6 +121,7 @@ def print_outputs(max_sharpe, min_volatility, num_portfolios):
 def plotly_graph(results_df, mean_returns, cov_matrix):
     max_sharpe, min_volatility = max_sharpe_and_min_vol(results_df)
     
+    # not working for sharpe
     max_sharpe = max_sharp_ratio_port(mean_returns, cov_matrix)
     ret_sharp_max, std_sharp_max = calc_port_perf(max_sharpe['x'], mean_returns, cov_matrix)
     
@@ -132,7 +136,7 @@ def plotly_graph(results_df, mean_returns, cov_matrix):
         y = results_df.Return,
         mode = 'markers',
         marker = dict(
-            color = results_df.Volatility/results_df.Return,
+            color = results_df.Return/results_df.Volatility,
             colorscale='RdBu',
             showscale=True,
             size=6,
@@ -157,7 +161,17 @@ def plotly_graph(results_df, mean_returns, cov_matrix):
             marker_symbol = 'star-dot',
             marker = dict(size=20),
             name = 'min_volatility'
-            )]
+            ),
+        
+        go.Scattergl(
+            x = [results_df.loc[results_df['Sharpe'].idxmax()]['Volatility']],
+            y = [results_df.loc[results_df['Sharpe'].idxmax()]['Return']],
+            mode = 'markers',
+            marker_symbol = 'star-dot',
+            marker = dict(size=20),
+            name = 'max_sharpe2'
+            ),
+        ]
 
     layout = go.Layout(
             xaxis = dict(
@@ -180,10 +194,6 @@ def plotly_graph(results_df, mean_returns, cov_matrix):
     
     return graphJSON
     
-
-####################################################
- ### TEST ###
- ############
 
 def create_max_min_df(mean_returns, cov_matrix, stocks):
     max_sharp = max_sharp_ratio_port(mean_returns, cov_matrix)
@@ -212,23 +222,19 @@ def create_max_min_df(mean_returns, cov_matrix, stocks):
 def main():
     start = dt.datetime(2012, 1, 1)
     end = dt.datetime(2023, 1, 1)
-    stocks = ['AAPL','AMZN','GOOG','NFLX']
+    stocks = ['AAPL','AMZN','GOOG','NFLX', 'TSLA', 'NVDA']
     data, wrong_stock = get_clean_data(stocks, start, end)
     
 
     # Could do for 1000, 10000 and 100000 simulations and show 3 tables.
-    num_portfolios = 10000
-    results, weights = efficient_frontier(data, num_portfolios, 0.05)
+    num_portfolios = 100000
+    results, weights = efficient_frontier(data, num_portfolios, 0.0)
     
     col_names = ["Return", "Volatility", "Sharpe"] + [col for col in data.columns]
     results_df = create_result_df(results, col_names)
-    print(results_df['Return'].mean())
+    
     
     # max_sharpe, min_volatility = max_sharpe_and_min_vol(results_df)  # Return the row of max_sharpe ratio and minimum volatility
-
-    
-    # graph_JSON = plotly_graph(results_df)
-
 
 
     ### TEST AREA ### 
@@ -238,8 +244,7 @@ def main():
     cov_matrix = returns.cov()
     
     graph = plotly_graph(results_df, mean_returns, cov_matrix)
-
-    print('-'*40)
+    
     max_sharpe, min_volatility = create_max_min_df(mean_returns, cov_matrix, stocks)
     print_outputs(max_sharpe, min_volatility, num_portfolios)  
 
