@@ -85,12 +85,8 @@ def plotly_graph(results_df):
         y = results_df.Return,
         mode = 'markers',
         marker = dict(
-            color = results_df.Volatility/results_df.Return,
-            colorscale='RdBu',
-            showscale=True,
-            size=6,
-            line= dict(width=1),
-            colorbar=dict(title="Sharpe<br>Ratio")),
+            color = np.random.randn(len(results_df)),
+            colorscale='dense'),
         name = 'data'
         ),
         
@@ -125,11 +121,10 @@ def plotly_graph(results_df):
     )
 
     fig = go.Figure(data=data, layout=layout)  # Create the figure
-    fig.update_layout(legend = dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
     # fig.update_layout(title='Efficient Frontier')  # Can update anything in the figure or data points (trace)
     # plotly.offline.plot(fig, filename='result.html')  # Download the figure if needed
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    fig.show()
+    # fig.show()
     
     return graphJSON
     
