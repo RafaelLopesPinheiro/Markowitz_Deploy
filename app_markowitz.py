@@ -20,17 +20,22 @@ def calculate_efficient_frontier():
     
     ## FIX EFFICIENT FRONTIER CALCULATIONS 
     num_portfolios = 10000
-    results = model.efficient_frontier(data, num_portfolios, risk_free_rate=0.05)
-    
+    results, weights = model.efficient_frontier(data, num_portfolios, 0.0)
     
     col_names = ["Return", "Volatility", "Sharpe"] + [col for col in data.columns]
     results_df = model.create_result_df(results, col_names)
-    print(results_df['Return'].mean())
     
-    
-    max_sharpe, min_volatility = model.max_sharpe_and_min_vol(results_df)
-    graph_JSON = model.plotly_graph(results_df)
 
+    returns = data.pct_change().dropna()
+    mean_returns = returns.mean()
+    cov_matrix = returns.cov()
+    
+    graph_JSON = model.plotly_scatter_graph(results_df, mean_returns, cov_matrix)
+    
+    max_sharpe, min_volatility = model.create_max_min_df(mean_returns, cov_matrix, stocks)
+    model.print_outputs(max_sharpe, min_volatility, num_portfolios)  
+    max_sharpe = model.create_sharpe_df(results_df)
+    
     return  render_template('predicted.html', data = [max_sharpe.to_html(), min_volatility.to_html(), graph_JSON, wrong_stock])
 
 
