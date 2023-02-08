@@ -129,7 +129,7 @@ def plotly_graph(results_df):
     # fig.update_layout(title='Efficient Frontier')  # Can update anything in the figure or data points (trace)
     # plotly.offline.plot(fig, filename='result.html')  # Download the figure if needed
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    fig.show()
+    # fig.show()
     
     return graphJSON
     
