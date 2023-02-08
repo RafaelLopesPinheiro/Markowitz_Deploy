@@ -69,7 +69,7 @@ def min_variance_port(mean_returns, cov_matrix):
 
 def efficient_frontier(df, num_portfolios, risk_free_rate=0.0):
     '''
-    Returns the portfolios stdev, returns, sharpe ratio and weights of each stock.
+    Calculate the portfolios stdev, returns, sharpe ratio and weights of each stock and return as np.array.
     '''
     
     returns = df.pct_change().dropna()
@@ -84,12 +84,10 @@ def efficient_frontier(df, num_portfolios, risk_free_rate=0.0):
         weights = np.array(np.random.random(len(cov_matrix)))  # Create a array with random weights from 0.0 to 1.0
         weights /= np.sum(weights)  # Divide by the sum of weights, making sum of array equals to 1.0
         
-        weights_record.append(weights)  #TESTING FUNCTION
+        weights_record.append(weights) 
         
         portfolio_return, portfolio_std_dev = calc_port_perf(weights, mean_daily_returns, cov_matrix)
-        std_neg = np.where(portfolio_return<0)
-        print(std_neg)
-        
+
         
         results[0, i] = portfolio_return
         results[1, i] = portfolio_std_dev
@@ -118,58 +116,65 @@ def print_outputs(max_sharpe, min_volatility, num_portfolios):
     print(f"Portfolio with min volatility in {num_portfolios} simulations\n{min_volatility}") 
 
 
-def plotly_graph(results_df, mean_returns, cov_matrix):
+def plotly_scatter_graph(results_df, mean_returns, cov_matrix, risk_free_rate=0, download=False):
     max_sharpe, min_volatility = max_sharpe_and_min_vol(results_df)
-    
-    # not working for sharpe
-    max_sharpe = max_sharp_ratio_port(mean_returns, cov_matrix)
-    ret_sharp_max, std_sharp_max = calc_port_perf(max_sharpe['x'], mean_returns, cov_matrix)
+
     
     min_vol = min_variance_port(mean_returns, cov_matrix)
     ret_min_vol, std_min_vol = calc_port_perf(min_vol['x'], mean_returns, cov_matrix)
-    
-    
-    # create a trace for data, max_sharpe and min_vol
+    min_vol_sharpe = (ret_min_vol - risk_free_rate) / std_min_vol
+
+    # Create trace for data, max_sharpe and min_vol portfolios
     data =[
         go.Scattergl(
         x = results_df.Volatility,
         y = results_df.Return,
         mode = 'markers',
         marker = dict(
-            color = results_df.Return/results_df.Volatility,
+            color = (results_df.Return - risk_free_rate)/results_df.Volatility,
             colorscale='RdBu',
             showscale=True,
             size=6,
             line= dict(width=1),
             colorbar=dict(title="Sharpe<br>Ratio")),
-        name = 'data'
+        name = 'portfolios',
+        
+        hovertemplate=
+            '<i>Return</i>: %{y:.3f}'+
+            '<br>Volatility: %{x:.3f}<br>'+
+            'Sharpe: %{text:.3f}',
+            text=results_df.Sharpe
+            
         ),
-        
-        go.Scattergl(
-            x = [std_sharp_max],
-            y = [ret_sharp_max],
-            mode = 'markers',
-            marker_symbol = 'star-dot',
-            marker = dict(size=20),
-            name = 'max_sharpe'
-            ),
-        
+                
         go.Scattergl(
             x = [std_min_vol],
             y = [ret_min_vol],
             mode = 'markers',
             marker_symbol = 'star-dot',
             marker = dict(size=20),
-            name = 'min_volatility'
+            name = 'min_volatility',
+            
+            hovertemplate =
+            '<i>Return</i>: %{y:.3f}'+
+            '<br>Volatility: %{x:.3f}<br>'+
+            'Sharpe: %{text:.3f}',
+            text=[min_vol_sharpe]
             ),
         
         go.Scattergl(
-            x = [results_df.loc[results_df['Sharpe'].idxmax()]['Volatility']],
-            y = [results_df.loc[results_df['Sharpe'].idxmax()]['Return']],
+            x = max_sharpe.iloc[1],
+            y = max_sharpe.iloc[0],
             mode = 'markers',
             marker_symbol = 'star-dot',
             marker = dict(size=20),
-            name = 'max_sharpe2'
+            name = 'max_sharpe',
+            
+            hovertemplate =
+            '<i>Return</i>: %{y:.3f}'+
+            '<br>Volatility: %{x:.3f}<br>'+
+            'Sharpe: %{text:.3f}',
+            text=max_sharpe.iloc[2]
             ),
         ]
 
@@ -188,9 +193,14 @@ def plotly_graph(results_df, mean_returns, cov_matrix):
     fig = go.Figure(data=data, layout=layout)  # Create the figure
     fig.update_layout(legend = dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
     # fig.update_layout(title='Efficient Frontier')  # Can update anything in the figure or data points (trace)
-    # plotly.offline.plot(fig, filename='result.html')  # Download the figure if needed
+    
+    fig.update_layout(hovermode='x')
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     fig.show()
+    if download:
+        plotly.offline.plot(fig, filename='result.html')  # Download the figure if needed
+    else:
+        pass
     
     return graphJSON
     
@@ -233,17 +243,12 @@ def main():
     col_names = ["Return", "Volatility", "Sharpe"] + [col for col in data.columns]
     results_df = create_result_df(results, col_names)
     
-    
-    # max_sharpe, min_volatility = max_sharpe_and_min_vol(results_df)  # Return the row of max_sharpe ratio and minimum volatility
-
-
-    ### TEST AREA ### 
 
     returns = data.pct_change().dropna()
     mean_returns = returns.mean()
     cov_matrix = returns.cov()
     
-    graph = plotly_graph(results_df, mean_returns, cov_matrix)
+    graph = plotly_scatter_graph(results_df, mean_returns, cov_matrix)
     
     max_sharpe, min_volatility = create_max_min_df(mean_returns, cov_matrix, stocks)
     print_outputs(max_sharpe, min_volatility, num_portfolios)  
