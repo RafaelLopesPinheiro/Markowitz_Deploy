@@ -27,16 +27,16 @@
         </div>
     </p>
     </form>
-
     <div class='index-text'>
-        <h3 style='margin-bottom: 12px'>How to use:</h3>
-            <p>Put the stock tickers you want to calculate the efficient frontier on the cells above.</p>
-            <p>The tickers need to be the same as in Yahoo Finance website.</p>
     </div>
     
-    <div class='index-text'>
-        ADD DISCLAIMER HERE.
-    </div>
+    <div class='container-fluid ps-5'>
+        THIS IS NOT A INVESTMENT RECOMENDATION 
+        <h3 style='margin-bottom: 12px'>How to use:</h3>
+            <li>Put the stock tickers you want to calculate the efficient frontier on the cells above.</li>
+            <li>The tickers need to be the same as in Yahoo Finance website.</li>
+    
+    
     <!-- MAKE CLEARLY TO USE AND WELL WRITEN ALL SECTIONS. 
         - CREATE DATA BASE TO SAVE AND EXPORT RESULTS TO USER 
         - DESCRIBE HOW THE BASIC PRINCIPLES OF ASSET ALOCATION (USE REFFERENCE TO MAKE YOUR THOGHTS)
@@ -44,10 +44,20 @@
     
     -->
 
+            <br/>
+            <li>Markowitz efficient frontier measure the "quality" of your return based on how much risk you incur</li>
+            <li>This application exhibit how much to allocate in each asset as percentage of your total portfolio</li>
+            <li>The percentage of assets fluctuate over time, needing to rebalance the portfolio</li>
 
-    <!-- MAYBE PUT THIS AS BUTTON TO ADD N NUMBER OF LINES TO SEND STOCKS. --> 
-    The correlation of risk between the stocks in portfolio go to zero if well done, but could go to median variance on the other way, be aware.
-    You can use variety of different assets class to have better diversified your risk.
+            <li>
+                The correlation of risk between the stocks in portfolio go to zero if well done,
+                but could go to median variance on the other way, be aware.
+                <b>You can use variety of different assets class to have better diversified your risk.</b>
+            </li>
+            <li>
+                For this model we are using a risk free rate of 0% to calculate Sharpe ratio
+            </li>
 
+    </div>
 
 {% endblock %}
