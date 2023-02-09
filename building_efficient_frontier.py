@@ -187,8 +187,8 @@ def plotly_scatter_graph(results_df, mean_returns, cov_matrix, risk_free_rate=0,
                 title = 'Return',
                 tickformat="%"
             ),
-            width = 900,
-            height = 600,
+            width = 700,
+            height = 500,
             title = 'Efficient Frontier'
     )
 
@@ -221,16 +221,16 @@ def create_max_min_df(mean_returns, cov_matrix, stocks):
     min_vol_df = pd.DataFrame(data={'Return': [ret_min_vol], 'Volatility':[std_min_vol]}, index=['Min_vol']).T
     min_vol_df.loc['Sharpe'] = min_vol_df['Min_vol'][0] / min_vol_df['Min_vol'][1]
     
-    for i, j in enumerate(stocks):
-        max_sharpe_df.loc[j] = round(max_sharp['x'][i], 4)
-        min_vol_df.loc[j] = round(min_var['x'][i], 4)
+    for i in range(0, len(mean_returns)):
+        max_sharpe_df.loc[mean_returns.index[i]] = round(max_sharp['x'][i], 4)
+        min_vol_df.loc[mean_returns.index[i]] = round(min_var['x'][i], 4)
         
     
     return max_sharpe_df, min_vol_df
 
 
 def create_sharpe_df(results_df):
-    max_sharpe = pd.DataFrame(results_df.loc[results_df['Sharpe'].idxmax()])
+    max_sharpe = pd.DataFrame(data={"Max_Sharpe" : results_df.loc[results_df['Sharpe'].idxmax()]})
     return max_sharpe
 
 

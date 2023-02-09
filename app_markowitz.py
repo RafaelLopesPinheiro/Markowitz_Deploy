@@ -35,8 +35,11 @@ def calculate_efficient_frontier():
     max_sharpe, min_volatility = model.create_max_min_df(mean_returns, cov_matrix, stocks)
     model.print_outputs(max_sharpe, min_volatility, num_portfolios)  
     max_sharpe = model.create_sharpe_df(results_df)
+    max_sharpe_proportions = max_sharpe[3:]*100
+    min_volatility_proportions = min_volatility[3:]*100
     
-    return  render_template('predicted.html', data = [max_sharpe.to_html(), min_volatility.to_html(), graph_JSON, wrong_stock])
+    return  render_template('predicted.html', data = [max_sharpe.to_html(), min_volatility.to_html(), graph_JSON,
+                                                      max_sharpe_proportions.to_html(), min_volatility_proportions.to_html(), wrong_stock])
 
 
 @app.route('/about', methods=["GET"])
