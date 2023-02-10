@@ -4,8 +4,8 @@
 
 {% block content %}
 <div class='container text-center'>
-{% if data[:-1] != [] %}
-<div align='center'>The stock ticker {{data[-1] | trim("[]") }} doesn't exist in yahoo finance.</div>
+{% if data[-1] != [] %}
+<div align='center'>The ticker {{data[-1] | trim("[]") }} doesn't exist in yahoo finance.</div>
 {% endif %} 
 
 <div class='row'> 
@@ -13,17 +13,16 @@
     <div class='col' align='center'>  min volatility{{data[1] | safe | center }} </div>
 </div>
 
-<div class='row'>
-    <div class='col' align='center'> Proportions {{data[3] | safe }} 
-</div>
 
 <div class='row'>
+    <div class='col' align='center'>
     <div id='chart' class='chart'” align='center'></div>
         <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
         <script type='text/javascript'>
         var graphs = {{data[2] | safe}};
         Plotly.plot('chart',graphs,{});
     </script>
+    </div>
 </div>
 
 
