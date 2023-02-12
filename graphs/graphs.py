@@ -3,7 +3,7 @@ import plotly.graph_objs as go
 import json
 
 
-def plotly_scatter_graph(results_df, mean_returns, cov_matrix, risk_free_rate=0.03, download=False):
+def plotly_ef_frontier(results_df, mean_returns, cov_matrix, risk_free_rate=0.03, download=False):
     from building_efficient_frontier import max_sharpe_and_min_vol, calc_port_perf, min_variance_port
     
     max_sharpe, min_volatility = max_sharpe_and_min_vol(results_df)
@@ -13,7 +13,7 @@ def plotly_scatter_graph(results_df, mean_returns, cov_matrix, risk_free_rate=0.
     ret_min_vol, std_min_vol = calc_port_perf(min_vol['x'], mean_returns, cov_matrix)
     min_vol_sharpe = (ret_min_vol - risk_free_rate) / std_min_vol
 
-    # Create trace for data, max_sharpe and min_vol portfolios
+
     data =[
         go.Scattergl(
         x = results_df.Volatility,

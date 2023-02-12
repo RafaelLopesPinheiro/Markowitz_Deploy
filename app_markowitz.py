@@ -31,10 +31,9 @@ def calculate_efficient_frontier():
     mean_returns = returns.mean()
     cov_matrix = returns.cov()
     
-    graph_efficient_frontier = graphs.plotly_scatter_graph(results_df, mean_returns, cov_matrix)
+    graph_efficient_frontier = graphs.plotly_ef_frontier(results_df, mean_returns, cov_matrix)
     
     max_sharpe, min_volatility = model.create_max_min_df(mean_returns, cov_matrix, stocks)
-    model.print_outputs(max_sharpe, min_volatility, num_portfolios)  
     max_sharpe = model.create_sharpe_df(results_df)
     graph_portfolio_value = graphs.plot_portfolio_value(data, max_sharpe, portfolio_init_value=10000)
     

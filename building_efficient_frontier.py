@@ -161,7 +161,7 @@ def main():
     cov_matrix = returns.cov()
     
     # graph = plotly_scatter_graph(results_df, mean_returns, cov_matrix)
-    graph = graphs.plotly_scatter_graph(results_df, mean_returns, cov_matrix)
+    graph = graphs.plotly_ef_frontier(results_df, mean_returns, cov_matrix)
     max_sharpe, min_volatility = create_max_min_df(mean_returns, cov_matrix, stocks)
 
     
