@@ -5,20 +5,20 @@
 {% block content%}
 <form action="/predict" method="post">
     <br>
-    <label for="stock_1">Stock 1:</label>
-    <input type="text" name="stock_1" id="stock_1" style="text-transform:uppercase">
+    <label for="asset_1">Asset 1:</label>
+    <input type="text" name="asset_1" id="asset_1" style="text-transform:uppercase">
     
     <br>    
-    <label for="stock_2">Stock 2:</label>
-    <input type="text" name="stock_2" id="stock_2" style="text-transform:uppercase">
+    <label for="asset_2">Asset 2:</label>
+    <input type="text" name="asset_2" id="asset_2" style="text-transform:uppercase">
     
     <br>
-    <label for="stock_3">Stock 3:</label>
-    <input type="text" name="stock_3" id="stock_3" style="text-transform:uppercase">
+    <label for="asset_3">Asset 3:</label>
+    <input type="text" name="asset_3" id="asset_3" style="text-transform:uppercase">
     
     <br>
-    <label for="stock_4">Stock 4:</label>
-    <input type="text" name="stock_4" id="stock_4" style="text-transform:uppercase">
+    <label for="asset_4">Asset 4:</label>
+    <input type="text" name="asset_4" id="asset_4" style="text-transform:uppercase">
     
  
     <p>
@@ -27,18 +27,42 @@
         </div>
     </p>
     </form>
-
     <div class='index-text'>
+    </div>
+    
+    <div class='container-fluid ps-5'>
+        THIS IS NOT A INVESTMENT RECOMENDATION 
         <h3 style='margin-bottom: 12px'>How to use:</h3>
-            <p>Put the stock tickers you want to calculate the efficient frontier on the cells above.</p>
-            <p>The tickers need to be the same as in Yahoo Finance website.</p>
-    </div>
+            <li>Put the stock tickers you want to calculate the efficient frontier on the cells above.</li>
+            <li>The tickers need to be the same as in Yahoo Finance website.</li>
     
-    <div class='index-text'>
-        ADD DISCLAIMER HERE.
-    </div>
     
-    <!-- MAYBE PUT THIS AS BUTTON TO ADD N NUMBER OF LINES TO SEND STOCKS. --> 
-    The correlation of risk between the stocks in portfolio go to zero if well done, but could go to median variance on the other way, be aware.
-    You can use variety of different assets class to have better diversified your risk.
+    <!-- MAKE CLEARLY TO USE AND WELL WRITEN ALL SECTIONS. 
+        - CREATE DATA BASE TO SAVE AND EXPORT RESULTS TO USER 
+        - DESCRIBE HOW THE BASIC PRINCIPLES OF ASSET ALOCATION (USE REFFERENCE TO MAKE YOUR THOGHTS)
+        - 
+    
+    -->
+
+            <br/>
+            <li>Markowitz efficient frontier measure the "quality" of your return based on how much risk you incur</li>
+            <li>This application exhibit how much to allocate in each asset as percentage of your total portfolio</li>
+            <li>The percentage of assets fluctuate over time, needing to rebalance the portfolio</li>
+
+            <li>
+                The correlation of risk between the stocks in portfolio go to zero if well done,
+                but could go to median variance on the other way, be aware.
+                <br><b>You can use variety of different assets class to have better diversified your risk.</b>
+            </li>
+            <li>
+                For this model we are using a risk free rate of 3% to calculate Sharpe ratio
+            </li>
+            <li>
+                We are not accounting for trade fee
+            </li>
+            <li>
+                This is a retro look, it may not work as well in the future as it did in the past
+            </li>
+    </div>
+
 {% endblock %}

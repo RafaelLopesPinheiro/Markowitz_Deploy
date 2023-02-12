@@ -3,22 +3,41 @@
 {% block title %} Predicted {%endblock%}
 
 {% block content %}
-
-{% if data[3] != [] %}
-<div align='center'>The stock ticker {{data[3] | trim("['']") }} doesn't exist in yahoo finance.</div>
+<div class='container text-center'>
+{% if data[-1] != [] %}
+<div align='center'>The ticker {{data[-1] | trim("[]") }} doesn't exist in yahoo finance.</div>
 {% endif %} 
 
 <div class='row'> 
-    <div class='column' align='center'> max sharpe ratio{{data[0] | safe  }}</div>
-    <div class='column' align='center'>  min volatility{{data[1] | safe | center }} </div>
+    <div class='col' align='center'> max sharpe ratio{{data[0] | safe  }}</div>
+    <div class='col' align='center'>  min volatility{{data[1] | safe | center }} </div>
 </div>
 
-    
-<div id='chart' class='chart'” align='center'></div>
-<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
-<script type='text/javascript'>
-    var graphs = {{data[2] | safe}};
-    Plotly.plot('chart',graphs,{});
-</script>
+
+<div class='row'>
+    <div class='col' align='center'>
+    <div id='chart' class='chart'” align='center'></div>
+        <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+        <script type='text/javascript'>
+        var graphs = {{data[2] | safe}};
+        Plotly.plot('chart',graphs,{});
+    </script>
+    </div>
+</div>
+
+
+<div class='row'>
+    <div class='col' id='chart1' align='center'>
+        <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+        <script type='text/javascript'>
+        var graphs1 = {{data[3] | safe }};
+        Plotly.plot('chart1', graphs1, {});
+        </script>
+    </div>
+</div>
+
+
+
+</div>
 
 {% endblock %}
