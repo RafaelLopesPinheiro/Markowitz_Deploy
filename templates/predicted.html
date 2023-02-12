@@ -26,6 +26,18 @@
 </div>
 
 
+<div class='row'>
+    <div class='col' id='chart1' align='center'>
+        <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+        <script type='text/javascript'>
+        var graphs1 = {{data[3] | safe }};
+        Plotly.plot('chart1', graphs1, {});
+        </script>
+    </div>
+</div>
+
+
+
 </div>
 
 {% endblock %}
