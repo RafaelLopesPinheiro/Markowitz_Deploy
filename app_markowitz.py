@@ -12,7 +12,7 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def calculate_efficient_frontier():  
-    
+    print(request.form)
     stocks = model.form_stocks(request=request)
     start = dt.datetime(2012, 1, 1)
     end = dt.datetime(2023, 1, 1)
@@ -38,7 +38,6 @@ def calculate_efficient_frontier():
     graph_portfolio_value = graphs.plot_portfolio_value(data, max_sharpe, portfolio_init_value=10000)
     
  
-    
     return  render_template('predicted.html', data = [max_sharpe.to_html(), min_volatility.to_html(), graph_efficient_frontier,
                                                       graph_portfolio_value, wrong_stock])
 

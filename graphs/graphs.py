@@ -3,16 +3,17 @@ import plotly.graph_objs as go
 import json
 
 
-def plotly_ef_frontier(results_df, mean_returns, cov_matrix, risk_free_rate=0.03, download=False):
-    from building_efficient_frontier import max_sharpe_and_min_vol, calc_port_perf, min_variance_port
-    
-    max_sharpe, min_volatility = max_sharpe_and_min_vol(results_df)
+def plotly_ef_frontier(results_df, mean_returns, cov_matrix, risk_free_rate=0.003, download=False):
+    from building_efficient_frontier import calc_port_perf, min_variance_port, max_sharp_ratio_port
 
-    
     min_vol = min_variance_port(mean_returns, cov_matrix)
     ret_min_vol, std_min_vol = calc_port_perf(min_vol['x'], mean_returns, cov_matrix)
     min_vol_sharpe = (ret_min_vol - risk_free_rate) / std_min_vol
 
+
+    max_sharpe = max_sharp_ratio_port(mean_returns, cov_matrix, risk_free_rate=0.003)
+    ret_max_sharpe, std_max_sharpe = calc_port_perf(max_sharpe['x'], mean_returns, cov_matrix)
+    max_sharpe_port = (ret_max_sharpe - risk_free_rate) / std_max_sharpe
 
     data =[
         go.Scattergl(
@@ -32,8 +33,7 @@ def plotly_ef_frontier(results_df, mean_returns, cov_matrix, risk_free_rate=0.03
             '<i>Return</i>: %{y:.3f}'+
             '<br>Volatility: %{x:.3f}<br>'+
             'Sharpe: %{text:.3f}',
-            text=results_df.Sharpe
-            
+            text=(results_df.Return - risk_free_rate)/results_df.Volatility
         ),
                 
         go.Scattergl(
@@ -50,31 +50,31 @@ def plotly_ef_frontier(results_df, mean_returns, cov_matrix, risk_free_rate=0.03
             'Sharpe: %{text:.3f}',
             text=[min_vol_sharpe]
             ),
-        
+               
         go.Scattergl(
-            x = max_sharpe.iloc[1],
-            y = max_sharpe.iloc[0],
+            x = [std_max_sharpe],
+            y = [ret_max_sharpe],
             mode = 'markers',
             marker_symbol = 'star-dot',
             marker = dict(size=20),
-            name = 'max_sharpe',
+            name = 'max_sharp_scipy',
             
             hovertemplate =
             '<i>Return</i>: %{y:.3f}'+
             '<br>Volatility: %{x:.3f}<br>'+
             'Sharpe: %{text:.3f}',
-            text=max_sharpe.iloc[2]
+            text=[max_sharpe_port]
             ),
         ]
 
     layout = go.Layout(
             xaxis = dict(
                 title = 'Volatility',
-                tickformat="%"
+                tickformat=".1%"
             ), 
             yaxis = dict(
                 title = 'Return',
-                tickformat="%"
+                tickformat=".1%"
             ),
             width = 700,
             height = 500,
@@ -87,7 +87,7 @@ def plotly_ef_frontier(results_df, mean_returns, cov_matrix, risk_free_rate=0.03
     
     
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    # fig.show()
+    fig.show()
     if download:
         plotly.offline.plot(fig, filename='result.html')  # Download the figure if needed
     else:
