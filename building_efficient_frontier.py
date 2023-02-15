@@ -155,6 +155,8 @@ def create_output_df(returns, max_sharpe_df, min_var_df):
                          pd.Series({'Sortino' : sortino_min_var}),
                          min_var_df.iloc[3:]['Min_vol']])
     
+    max_sharpe = pd.DataFrame(data={'Max_sharpe' : max_sharpe})
+    min_var = pd.DataFrame(data={'Min_var' : min_var})
     return max_sharpe, min_var
 
 

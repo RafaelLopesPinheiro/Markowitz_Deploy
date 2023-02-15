@@ -35,12 +35,19 @@ def calculate_efficient_frontier():
     
     max_sharpe, min_volatility = model.create_max_min_df(mean_returns, cov_matrix)
     max_sharpe_output, min_volatility_output = model.create_output_df(returns, max_sharpe, min_volatility)
-
-    graph_portfolio_value = graphs.plot_portfolio_value(data, max_sharpe_output)
+    
+    
+    print('MIN_VOL_OUTPUT = ', min_volatility_output)
+    print('Max_sharp_output  = ', max_sharpe_output)
+    
+    graph_portfolio_value_max_sharpe = graphs.plot_portfolio_value(data, max_sharpe_output)
+    
+    # ADD GRAPH MIN VARIANCE PORT TO OUTPUTS 
+    # graph_portfolio_value_min_var = graphs.plot_portfolio_value(data, min_volatility_output)
     
 
     return  render_template('predicted.html', data = [max_sharpe_output.to_html(), min_volatility_output.to_html(), graph_efficient_frontier,
-                                                      graph_portfolio_value, wrong_stock])
+                                                      graph_portfolio_value_max_sharpe, wrong_stock])
 
 
 @app.route('/about', methods=["GET"])

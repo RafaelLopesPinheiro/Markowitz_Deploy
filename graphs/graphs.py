@@ -6,6 +6,7 @@ import json
 def plotly_ef_frontier(results_df, mean_returns, cov_matrix, risk_free_rate=0.003, download=False):
     from building_efficient_frontier import calc_port_perf, min_variance_port, max_sharp_ratio_port
 
+    ## COULD REMOVE MAX AND MIN FROM HERE TO PASS AS PARAMETERS? 
     min_vol = min_variance_port(mean_returns, cov_matrix)
     ret_min_vol, std_min_vol = calc_port_perf(min_vol['x'], mean_returns, cov_matrix)
     min_vol_sharpe = (ret_min_vol - risk_free_rate) / std_min_vol
@@ -103,19 +104,21 @@ def plot_portfolio_value(prices, max_sharpe, portfolio_init_value = 10000):
         max_sharpe (DataFrame): Dataframe with weights of each stock.
         portfolio_value (int, optional): Portfolio initial value. Defaults to 10000.
     """
-    proportions = max_sharpe[4:]
+    proportions = max_sharpe[4:].T
     print(proportions)
     
-    # for i, j in enumerate(proportions):
-    #     print('i = ', i, 'J = ',j)
+    for i, j in enumerate(proportions):
+        print('i = ', i, 'J = ',j)
     #     print('prices[i][0] = ', prices.iloc[:, [i]])
     #     n_stocks = [(portfolio_init_value * j) / prices.iloc[0 ,[i]]]
     #     return n_stocks
     
     # print('n_stocks = ',n_stocks)
     
+    print(prices.iloc[0, [1]][0],'\n')
+    print(proportions['AAPL'][0], '\n')
     
-    n_stocks_initial = [(portfolio_init_value * j) / prices.iloc[0, [i]] 
+    n_stocks_initial = [((portfolio_init_value * proportions[j][0]) / prices.iloc[0, [i]]) 
                 for i, j in enumerate(proportions)]
 
     print(n_stocks_initial)
@@ -124,10 +127,10 @@ def plot_portfolio_value(prices, max_sharpe, portfolio_init_value = 10000):
     
     ## Multiply the initial number of stocks through out time
     for i, j in enumerate(prices):
-        prices[f'{j}_port'] = (prices[j] * n_stocks_initial[i])
+        prices[f'{j}_port'] = (prices[j] * n_stocks_initial[i].values)
 
     prices['port_total'] = prices.loc[:, prices.columns.values[len(n_stocks_initial):]].sum(axis=1)  
-    
+    print(prices['port_total'])
      
     data = [go.Scatter(
             x=prices.index,
@@ -157,5 +160,7 @@ def plot_portfolio_value(prices, max_sharpe, portfolio_init_value = 10000):
     fig.update_layout(legend = dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
     fig.update_layout(hovermode='x')
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)    
+    
+    fig.show()
     
     return graphJSON
