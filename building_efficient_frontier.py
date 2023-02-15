@@ -28,18 +28,18 @@ def get_clean_data(stock_list, start, end): # Download and clean data from yahoo
 
 def calc_port_perf(weights, mean_returns, cov_matrix): 
     portfolio_return = np.sum(mean_returns * weights) * 252  # 252 represent a year of trading days
-    portfolio_std = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights))) * np.sqrt(252) 
+    portfolio_std = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights))) * np.sqrt(252)    
     return portfolio_return, portfolio_std
 
 
-def negative_sharp(weights, mean_returns, cov_matrix, risk_free_rate=0.003):
-    port_ret, port_var = calc_port_perf(weights, mean_returns, cov_matrix)
-    return -(port_ret - risk_free_rate) / port_var
-
-
 def max_sharp_ratio_port(mean_returns, cov_matrix, risk_free_rate=0.003):
+    
+    def negative_sharp(weights, mean_returns, cov_matrix, risk_free_rate=0.003):
+        port_ret, port_var = calc_port_perf(weights, mean_returns, cov_matrix)
+        return -(port_ret - risk_free_rate) / port_var
+    
     n_assets = len(mean_returns)
-    args = (mean_returns, cov_matrix)
+    args = (mean_returns, cov_matrix, risk_free_rate)
     constraints = ({'type':'eq', 'fun': lambda x: np.sum(x) - 1})
     bounds = tuple( (0.0, 1.0) for asset in range(n_assets) )
     
@@ -47,13 +47,11 @@ def max_sharp_ratio_port(mean_returns, cov_matrix, risk_free_rate=0.003):
     return optimizer
 
 
-def get_port_min_vol(weights, mean_returns, cov_matrix):
-    min_vol = calc_port_perf(weights, mean_returns, cov_matrix)[1]
-        
-    return min_vol
-
-
 def min_variance_port(mean_returns, cov_matrix):
+    
+    def get_port_min_vol(weights, mean_returns, cov_matrix): 
+        return calc_port_perf(weights, mean_returns, cov_matrix)[1]
+    
     n_assets = len(mean_returns)
     args = (mean_returns, cov_matrix)
     constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
@@ -63,8 +61,7 @@ def min_variance_port(mean_returns, cov_matrix):
     return optimizer
 
 
-
-def efficient_frontier(df, num_portfolios, risk_free_rate=0.003):
+def efficient_frontier_random(df, num_portfolios, risk_free_rate=0.003):
     '''
     Calculate the portfolios stdev, returns, sharpe ratio and weights of each stock and return as np.array.
     '''
@@ -101,11 +98,6 @@ def create_result_df(results, col_names):
     return results_df
     
 
-def max_sharpe_and_min_vol(results_df):
-    return (pd.DataFrame(results_df.iloc[results_df['Sharpe'].idxmax()])
-            ,pd.DataFrame(results_df.iloc[results_df['Volatility'].idxmin()]))
-
-
 def print_outputs(max_sharpe, min_volatility, num_portfolios):
     print('-'*70)
     print(f"Portfolio with max sharpe ratio in {num_portfolios} simulations\n{max_sharpe}")
@@ -113,8 +105,7 @@ def print_outputs(max_sharpe, min_volatility, num_portfolios):
     print(f"Portfolio with min volatility in {num_portfolios} simulations\n{min_volatility}") 
 
 
-    
-def create_max_min_df(mean_returns, cov_matrix, stocks, risk_free_rate=0.003):
+def create_max_min_df(mean_returns, cov_matrix, risk_free_rate=0.003):
     max_sharp = max_sharp_ratio_port(mean_returns, cov_matrix)
     ret_max_sharpe, std_max_sharpe = calc_port_perf(max_sharp['x'], mean_returns, cov_matrix)
 
@@ -136,12 +127,6 @@ def create_max_min_df(mean_returns, cov_matrix, stocks, risk_free_rate=0.003):
     return max_sharpe_df, min_vol_df
 
 
-def create_sharpe_df(results_df):
-    max_sharpe = pd.DataFrame(data={"Max_Sharpe" : results_df.loc[results_df['Sharpe'].idxmax()]})
-    return max_sharpe
-
-
-
 def sortino_ratio(returns, N=252, risk_free_rate=0.003, min=False):
     if min:
         weights_min = min_variance_port(returns.mean(), returns.cov())
@@ -155,10 +140,22 @@ def sortino_ratio(returns, N=252, risk_free_rate=0.003, min=False):
         mean = port_returns.mean() * N -risk_free_rate
         std_neg = port_returns.loc[port_returns < 0].std()*np.sqrt(N) 
     
-    
     return mean/std_neg   
     
 
+def create_output_df(returns, max_sharpe_df, min_var_df):
+    sortino_min_var = sortino_ratio(returns, N=252, risk_free_rate=0.003, min=True)
+    sortino_max_sharpe = sortino_ratio(returns, N=252, risk_free_rate=0.003)
+
+    max_sharpe = pd.concat([max_sharpe_df.iloc[:3]['Max_sharpe'],
+                            pd.Series({'Sortino' : sortino_max_sharpe}),
+                            max_sharpe_df.iloc[3:]['Max_sharpe']])
+    
+    min_var = pd.concat([min_var_df.iloc[:3]['Min_vol'],
+                         pd.Series({'Sortino' : sortino_min_var}),
+                         min_var_df.iloc[3:]['Min_vol']])
+    
+    return max_sharpe, min_var
 
 
 def main():
@@ -169,8 +166,8 @@ def main():
     
 
     # Could do for 1000, 10000 and 100000 simulations and show 3 tables.
-    num_portfolios = 100000
-    results, weights = efficient_frontier(data, num_portfolios, 0.0)
+    num_portfolios = 10000
+    results, weights = efficient_frontier_random(data, num_portfolios, 0.0)
 
     
     col_names = ["Return", "Volatility", "Sharpe"] + [col for col in data.columns]
@@ -180,22 +177,19 @@ def main():
     mean_returns = returns.mean()
     cov_matrix = returns.cov()
     
-    # graph = plotly_scatter_graph(results_df, mean_returns, cov_matrix)
-    graph = graphs.plotly_ef_frontier(results_df, mean_returns, cov_matrix)
-    max_sharpe, min_volatility = create_max_min_df(mean_returns, cov_matrix, stocks)
 
+    graph = graphs.plotly_ef_frontier(results_df, mean_returns, cov_matrix)
+    max_sharpe, min_volatility = create_max_min_df(mean_returns, cov_matrix)
 
     # print_outputs(max_sharpe, min_volatility, num_portfolios)
-    graphs.plot_portfolio_value(data,  min_volatility)  
 
-    weights_min_var = min_variance_port(mean_returns, cov_matrix)['x']
 
-    sortino1 = sortino_ratio(returns, min=True)
+    max_sharpe_output, min_var_output = create_output_df(returns, max_sharpe, min_volatility)
+    print(max_sharpe_output, '\n', min_var_output)
 
-    weights_max = max_sharp_ratio_port(mean_returns, cov_matrix)['x']    
-    sortino2 = sortino_ratio(returns)
+    graphs.plot_portfolio_value(data,  max_sharpe_output)  
     
-    print(sortino1, '\n', sortino2)
+    
     
 
 if __name__ == "__main__":

@@ -21,7 +21,7 @@ def calculate_efficient_frontier():
     
     ## FIX EFFICIENT FRONTIER CALCULATIONS 
     num_portfolios = 10000
-    results, weights = model.efficient_frontier(data, num_portfolios, 0.0)
+    results, weights = model.efficient_frontier_random(data, num_portfolios, 0.0)
     
     col_names = ["Return", "Volatility", "Sharpe"] + [col for col in data.columns]
     results_df = model.create_result_df(results, col_names)
@@ -33,12 +33,13 @@ def calculate_efficient_frontier():
     
     graph_efficient_frontier = graphs.plotly_ef_frontier(results_df, mean_returns, cov_matrix)
     
-    max_sharpe, min_volatility = model.create_max_min_df(mean_returns, cov_matrix, stocks)
-    max_sharpe = model.create_sharpe_df(results_df)
-    graph_portfolio_value = graphs.plot_portfolio_value(data, max_sharpe, portfolio_init_value=10000)
+    max_sharpe, min_volatility = model.create_max_min_df(mean_returns, cov_matrix)
+    max_sharpe_output, min_volatility_output = model.create_output_df(returns, max_sharpe, min_volatility)
+
+    graph_portfolio_value = graphs.plot_portfolio_value(data, max_sharpe_output)
     
- 
-    return  render_template('predicted.html', data = [max_sharpe.to_html(), min_volatility.to_html(), graph_efficient_frontier,
+
+    return  render_template('predicted.html', data = [max_sharpe_output.to_html(), min_volatility_output.to_html(), graph_efficient_frontier,
                                                       graph_portfolio_value, wrong_stock])
 
 

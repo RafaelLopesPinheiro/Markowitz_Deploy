@@ -82,12 +82,10 @@ def plotly_ef_frontier(results_df, mean_returns, cov_matrix, risk_free_rate=0.00
     )
 
     fig = go.Figure(data=data, layout=layout)  # Create the figure
-    fig.update_layout(legend = dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
-    # fig.update_layout(title='Efficient Frontier')  # Can update anything in the figure or data points (trace)
-    
+    fig.update_layout(legend = dict(yanchor="top", y=0.99, xanchor="left", x=0.01))  
     
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    fig.show()
+       
     if download:
         plotly.offline.plot(fig, filename='result.html')  # Download the figure if needed
     else:
@@ -101,19 +99,34 @@ def plot_portfolio_value(prices, max_sharpe, portfolio_init_value = 10000):
     """Build the portfolio performance since the beginning 
 
     Args:
-        prices (_type_): _description_
-        max_sharpe (_type_): _description_
-        portfolio_value (int, optional): _description_. Defaults to 10000.
+        prices (DataFrame): Prices of every stock.
+        max_sharpe (DataFrame): Dataframe with weights of each stock.
+        portfolio_value (int, optional): Portfolio initial value. Defaults to 10000.
     """
-    proportions = max_sharpe.T
-    n_stocks = [(portfolio_init_value * proportions[i].values) / prices[i][0] for i in max_sharpe[3:].T]
+    proportions = max_sharpe[4:]
+    print(proportions)
+    
+    # for i, j in enumerate(proportions):
+    #     print('i = ', i, 'J = ',j)
+    #     print('prices[i][0] = ', prices.iloc[:, [i]])
+    #     n_stocks = [(portfolio_init_value * j) / prices.iloc[0 ,[i]]]
+    #     return n_stocks
+    
+    # print('n_stocks = ',n_stocks)
+    
+    
+    n_stocks_initial = [(portfolio_init_value * j) / prices.iloc[0, [i]] 
+                for i, j in enumerate(proportions)]
 
+    print(n_stocks_initial)
+    
+    
+    
     ## Multiply the initial number of stocks through out time
-
     for i, j in enumerate(prices):
-        prices[f'{j}_port'] = (prices[j] * n_stocks[i])
+        prices[f'{j}_port'] = (prices[j] * n_stocks_initial[i])
 
-    prices['port_total'] = prices.loc[:, prices.columns.values[len(n_stocks):]].sum(axis=1)  
+    prices['port_total'] = prices.loc[:, prices.columns.values[len(n_stocks_initial):]].sum(axis=1)  
     
      
     data = [go.Scatter(
@@ -140,9 +153,9 @@ def plot_portfolio_value(prices, max_sharpe, portfolio_init_value = 10000):
                 title = 'Portfolio Performance'
         )
     
-    fig1 = go.Figure(data=data, layout=layout)
-    fig1.update_layout(legend = dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
-    fig1.update_layout(hovermode='x')
-
-    graphJSON = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)    
+    fig = go.Figure(data=data, layout=layout)
+    fig.update_layout(legend = dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
+    fig.update_layout(hovermode='x')
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)    
+    
     return graphJSON
