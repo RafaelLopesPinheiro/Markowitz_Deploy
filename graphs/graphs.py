@@ -105,37 +105,22 @@ def plot_portfolio_value(prices, max_sharpe, portfolio_init_value = 10000):
         portfolio_value (int, optional): Portfolio initial value. Defaults to 10000.
     """
     proportions = max_sharpe[4:].T
-    print(proportions)
+    prices = prices.copy()
+
+    n_initial_shares = [((portfolio_init_value * proportions[j][0]) / prices.iloc[0, [i]][0]) 
+                for i, j in enumerate(proportions)]  # Calculate the initial number of shares in each asset 
+    
     
     for i, j in enumerate(proportions):
-        print('i = ', i, 'J = ',j)
-    #     print('prices[i][0] = ', prices.iloc[:, [i]])
-    #     n_stocks = [(portfolio_init_value * j) / prices.iloc[0 ,[i]]]
-    #     return n_stocks
-    
-    # print('n_stocks = ',n_stocks)
-    
-    print(prices.iloc[0, [1]][0],'\n')
-    print(proportions['AAPL'][0], '\n')
-    
-    n_stocks_initial = [((portfolio_init_value * proportions[j][0]) / prices.iloc[0, [i]]) 
-                for i, j in enumerate(proportions)]
+        prices[f'{j}_port'] = (prices[j] * n_initial_shares[i])  # Calculate the portfolio value of each stock
 
-    print(n_stocks_initial)
+    prices['port_total'] = prices.loc[:, prices.columns.values[len(n_initial_shares):]].sum(axis=1)  # Total portfolio value over time
+   
     
-    
-    
-    ## Multiply the initial number of stocks through out time
-    for i, j in enumerate(prices):
-        prices[f'{j}_port'] = (prices[j] * n_stocks_initial[i].values)
-
-    prices['port_total'] = prices.loc[:, prices.columns.values[len(n_stocks_initial):]].sum(axis=1)  
-    print(prices['port_total'])
-     
     data = [go.Scatter(
             x=prices.index,
             y=prices.port_total,
-            name='Portfolio',
+            name=f'{proportions.index[0]}_Portfolio',
             line=dict(
                 width=1,
                 
@@ -153,14 +138,12 @@ def plot_portfolio_value(prices, max_sharpe, portfolio_init_value = 10000):
                 ),
                 width = 700,
                 height = 500,
-                title = 'Portfolio Performance'
+                title = 'Portfolios Performances '
         )
     
     fig = go.Figure(data=data, layout=layout)
     fig.update_layout(legend = dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
     fig.update_layout(hovermode='x')
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)    
-    
-    fig.show()
     
     return graphJSON

@@ -129,16 +129,13 @@ def create_max_min_df(mean_returns, cov_matrix, risk_free_rate=0.003):
 
 def sortino_ratio(returns, N=252, risk_free_rate=0.003, min=False):
     if min:
-        weights_min = min_variance_port(returns.mean(), returns.cov())
-        port_returns = (weights_min['x'] * returns).sum(axis=1)
-        mean = port_returns.mean() * N -risk_free_rate
-        std_neg = port_returns.loc[port_returns < 0].std()*np.sqrt(N)
-    
+        weights = min_variance_port(returns.mean(), returns.cov())
     else:
-        weights_max = max_sharp_ratio_port(returns.mean(), returns.cov())
-        port_returns = (weights_max['x'] * returns).sum(axis=1)
-        mean = port_returns.mean() * N -risk_free_rate
-        std_neg = port_returns.loc[port_returns < 0].std()*np.sqrt(N) 
+        weights = max_sharp_ratio_port(returns.mean(), returns.cov())
+
+    port_returns = (weights['x'] * returns).sum(axis=1)
+    mean = port_returns.mean() * N -risk_free_rate
+    std_neg = port_returns.loc[port_returns < 0].std()*np.sqrt(N)
     
     return mean/std_neg   
     
@@ -187,9 +184,10 @@ def main():
 
 
     max_sharpe_output, min_var_output = create_output_df(returns, max_sharpe, min_volatility)
-    print(max_sharpe_output, '\n', min_var_output)
 
-    graphs.plot_portfolio_value(data,  max_sharpe_output)  
+
+    graphs.plot_portfolio_value(data,  min_var_output)
+    graphs.plot_portfolio_value(data, max_sharpe_output)
     
     
     
